@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Beat Marketplace</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <h1 class="logo">BeatMarket</h1>
+    <nav>
+      <a href="#">Explore</a>
+      <a href="#">Producers</a>
+      <a href="#">Login</a>
+      <button class="cta">Sign Up</button>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h2>Discover, Buy & Sell Beats</h2>
+    <p>High-quality instrumentals from top producers</p>
+    <input type="text" id="searchInput" placeholder="Search by genre, mood, BPM..." />
+  </section>
+
+  <!-- FILTERS -->
+  <section class="filters">
+    <select id="genreFilter">
+      <option value="">All Genres</option>
+      <option value="Hip Hop">Hip Hop</option>
+      <option value="R&B">R&B</option>
+      <option value="Trap">Trap</option>
+    </select>
+
+    <select id="moodFilter">
+      <option value="">All Moods</option>
+      <option value="Dark">Dark</option>
+      <option value="Chill">Chill</option>
+      <option value="Aggressive">Aggressive</option>
+    </select>
+  </section>
+
+  <!-- MARKETPLACE -->
+  <main id="beatContainer" class="grid"></main>
+
+  <!-- AUDIO PLAYER -->
+  <footer class="player">
+    <div id="nowPlaying">Select a beat to play</div>
+    <audio id="audioPlayer" controls></audio>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
