@@ -1,0 +1,161 @@
+:root {
+    /* High-end Midnight Blue & Gold Palette */
+    --bg-dark: #0a0e1a;          /* Deep Midnight Navy */
+    --card-bg: #111827;         /* Slightly lighter navy for depth */
+    --accent-gold: #c5a059;     /* Sophisticated Champagne Gold */
+    --gold-glow: rgba(197, 160, 89, 0.2);
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    padding-bottom: 100px;
+    background-image: radial-gradient(circle at top right, #161e31, #0a0e1a); /* Adds depth */
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 5%;
+    background: rgba(10, 14, 26, 0.9); /* Translucent Midnight */
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--accent-gold); /* Gold thin-line aesthetic */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo { 
+    font-weight: 800; 
+    font-size: 1.5rem; 
+    letter-spacing: 1px; 
+    text-transform: uppercase;
+}
+.logo span { color: var(--accent-gold); }
+
+.search-bar input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(197, 160, 89, 0.3); /* Subtle gold border */
+    padding: 10px 20px;
+    border-radius: 4px; /* Sharper edges look more professional */
+    color: white;
+    width: 400px;
+    transition: var(--transition);
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Hero */
+.hero {
+    height: 45vh;
+    /* Gradient overlay transitioned to midnight blue */
+    background: linear-gradient(rgba(10, 14, 26, 0.7), var(--bg-dark)), 
+                url('https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=1000');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+}
+
+/* Beat Cards */
+.beat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px; /* Increased gap for breathing room */
+    padding: 4rem 5%;
+}
+
+.beat-card {
+    background: var(--card-bg);
+    border-radius: 4px; /* Square/slightly rounded corners for luxury look */
+    padding: 20px;
+    transition: var(--transition);
+    border: 1px solid rgba(197, 160, 89, 0.1); /* Subtle outline */
+    position: relative;
+    overflow: hidden;
+}
+
+.beat-card:hover {
+    border-color: var(--accent-gold);
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px -10px var(--gold-glow);
+}
+
+.beat-card img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 2px;
+    object-fit: cover;
+    filter: brightness(0.9);
+}
+
+/* Audio Player */
+.audio-player {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 95px;
+    background: rgba(17, 24, 39, 0.98);
+    backdrop-filter: blur(20px);
+    border-top: 2px solid var(--accent-gold); /* Prominent gold accent */
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+    padding: 0 30px;
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.5);
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, #c5a059 0%, #ecd4a1 100%); /* Metallic gradient */
+    color: #0a0e1a;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 2px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-gold:hover {
+    filter: brightness(1.1);
+    letter-spacing: 1.5px;
+}
+
+.filter-tag {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid #334155;
+    padding: 6px 18px;
+    border-radius: 2px;
+    margin-right: 12px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.filter-tag:hover {
+    border-color: var(--accent-gold);
+    color: var(--text-main);
+}
+
+.filter-tag.active { 
+    background: var(--accent-gold); 
+    color: #0a0e1a; 
+    border-color: var(--accent-gold);
+}
