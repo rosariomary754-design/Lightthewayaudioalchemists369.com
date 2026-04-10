@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lighthouse Beats | Producer Marketplace</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">LIGHTHOUSE <span>BEATS</span></div>
+        <div class="search-bar">
+            <input type="text" placeholder="Search by genre, mood, or BPM...">
+        </div>
+        <div class="nav-links">
+            <a href="#">Explore</a>
+            <a href="#">Producers</a>
+            <button class="btn-primary">Sell Beats</button>
+            <i class="fa-regular fa-user-circle profile-icon"></i>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Find Your Signature Sound.</h1>
+            <p>The premium marketplace for exclusive beats and professional production services.</p>
+            <div class="hero-btns">
+                <button class="btn-gold">Browse Marketplace</button>
+                <button class="btn-outline">View Trending</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="filters">
+            <button class="filter-tag active">All</button>
+            <button class="filter-tag">Trap</button>
+            <button class="filter-tag">Lo-Fi</button>
+            <button class="filter-tag">R&B</button>
+            <button class="filter-tag">Drill</button>
+        </section>
+
+        <div class="beat-grid" id="beatGrid">
+            </div>
+    </main>
+
+    <footer class="audio-player">
+        <div class="now-playing">
+            <img src="https://via.placeholder.com/50" alt="Artwork" id="current-art">
+            <div class="track-info">
+                <span id="current-title">Select a track</span>
+                <span id="current-producer">Producer Name</span>
+            </div>
+        </div>
+        
+        <div class="player-controls">
+            <div class="buttons">
+                <i class="fa-solid fa-backward-step"></i>
+                <i class="fa-solid fa-play" id="main-play-btn"></i>
+                <i class="fa-solid fa-forward-step"></i>
+            </div>
+            <div class="progress-container">
+                <canvas id="waveform"></canvas>
+            </div>
+        </div>
+
+        <div class="player-actions">
+            <span class="price-tag" id="current-price">$29.99</span>
+            <button class="btn-gold">Add to Cart</button>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
