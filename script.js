@@ -1,24 +1,39 @@
-// Mock Data for Testing
-const beats = [
-    { id: 1, title: "Midnight City", producer: "Lighthouse Pro", price: "$29.99", genre: "Synthwave", art: "https://picsum.photos/id/101/300/300" },
-    { id: 2, title: "Deep Waters", producer: "WaveMaker", price: "$34.99", genre: "Trap", art: "https://picsum.photos/id/102/300/300" },
-    { id: 3, title: "Golden Hour", producer: "Soul Samples", price: "$49.99", genre: "Lo-Fi", art: "https://picsum.photos/id/103/300/300" },
-    { id: 4, title: "Aftermath", producer: "Beat Smith", price: "$24.99", genre: "Drill", art: "https://picsum.photos/id/104/300/300" }
-];
+// 1. SUPABASE CONFIGURATION
+// Replace these with your actual keys from the Supabase Dashboard Settings
+const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const grid = document.getElementById('beatGrid');
 const mainPlayBtn = document.getElementById('main-play-btn');
+let currentBeats = []; // Will hold data from DB
 
-// Initialize Grid
-function renderBeats() {
-    grid.innerHTML = beats.map(beat => `
+// 2. FETCH DATA FROM SUPABASE
+async function fetchBeatsFromDB() {
+    const { data, error } = await supabase
+        .from('beats')
+        .select('*');
+
+    if (error) {
+        console.error('Error fetching beats:', error);
+        return;
+    }
+
+    currentBeats = data;
+    renderBeats(currentBeats);
+}
+
+// 3. RENDER GRID
+function renderBeats(beatsToRender) {
+    grid.innerHTML = beatsToRender.map(beat => `
         <div class="beat-card" onclick="loadTrack(${beat.id})">
             <div style="position: relative;">
                 <img src="${beat.art}" alt="${beat.title}">
                 <i class="fa-solid fa-play play-overlay"></i>
             </div>
             <h3>${beat.title}</h3>
-            <p style="color: #b3b3b3;">${beat.producer}</p>
+            <p style="color: #94a3b8;">${beat.producer}</p>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                 <span class="genre-badge">${beat.genre}</span>
                 <strong>${beat.price}</strong>
@@ -27,28 +42,28 @@ function renderBeats() {
     `).join('');
 }
 
-// Player Logic
+// 4. PLAYER LOGIC
 function loadTrack(id) {
-    const track = beats.find(b => b.id === id);
+    const track = currentBeats.find(b => b.id === id);
+    if (!track) return;
+
     document.getElementById('current-title').innerText = track.title;
     document.getElementById('current-producer').innerText = track.producer;
     document.getElementById('current-price').innerText = track.price;
     document.getElementById('current-art').src = track.art;
     
-    // Toggle play icon
     mainPlayBtn.classList.remove('fa-play');
     mainPlayBtn.classList.add('fa-pause');
     
-    console.log(`Loading audio for: ${track.title}`);
+    console.log(`Now streaming: ${track.title}`);
     drawWaveform();
 }
 
-// Simple Waveform Visualization Mockup
 function drawWaveform() {
     const canvas = document.getElementById('waveform');
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#FFD700';
+    ctx.fillStyle = '#c5a059'; // Gold wave
     
     for(let i = 0; i < 100; i++) {
         const height = Math.random() * 50;
@@ -56,11 +71,11 @@ function drawWaveform() {
     }
 }
 
-// Event Listeners
 mainPlayBtn.addEventListener('click', () => {
     mainPlayBtn.classList.toggle('fa-play');
     mainPlayBtn.classList.toggle('fa-pause');
 });
 
-renderBeats();
+// INITIALIZE APP
+fetchBeatsFromDB();
 drawWaveform();
