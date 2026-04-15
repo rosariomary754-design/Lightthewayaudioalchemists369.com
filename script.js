@@ -1,81 +1,108 @@
-// 1. SUPABASE CONFIGURATION
-// Replace these with your actual keys from the Supabase Dashboard Settings
-const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'YOUR_PROJECT_URL';
+const SUPABASE_KEY = 'YOUR_ANON_KEY';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let user = null;
+let cart = [];
+let isSignUpMode = false;
+let currentConversationId = null;
 
-const grid = document.getElementById('beatGrid');
-const mainPlayBtn = document.getElementById('main-play-btn');
-let currentBeats = []; // Will hold data from DB
+// AUTHENTICATION & MFA
+async function handleAuth() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-// 2. FETCH DATA FROM SUPABASE
-async function fetchBeatsFromDB() {
-    const { data, error } = await supabase
-        .from('beats')
-        .select('*');
-
-    if (error) {
-        console.error('Error fetching beats:', error);
-        return;
+    if (isSignUpMode) {
+        const { data, error } = await _supabase.auth.signUp({ email, password });
+        if (error) alert(error.message);
+        else alert("Verification email sent!");
+    } else {
+        const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+        if (error) alert(error.message);
+        else {
+            user = data.user;
+            initSession();
+        }
     }
-
-    currentBeats = data;
-    renderBeats(currentBeats);
 }
 
-// 3. RENDER GRID
-function renderBeats(beatsToRender) {
-    grid.innerHTML = beatsToRender.map(beat => `
-        <div class="beat-card" onclick="loadTrack(${beat.id})">
-            <div style="position: relative;">
-                <img src="${beat.art}" alt="${beat.title}">
-                <i class="fa-solid fa-play play-overlay"></i>
-            </div>
+async function initSession() {
+    const { data } = await _supabase.auth.getUser();
+    if (data.user) {
+        user = data.user;
+        document.getElementById('auth-modal').style.display = 'none';
+        document.getElementById('auth-btn').style.display = 'none';
+        document.getElementById('user-profile-nav').style.display = 'flex';
+        document.getElementById('display-name').innerText = user.email;
+        loadCart();
+        subscribeToMessages();
+    }
+}
+
+// MARKETPLACE LOGIC
+async function fetchBeats() {
+    const { data, error } = await _supabase.from('beats').select('*');
+    if (data) renderBeats(data);
+}
+
+function renderBeats(beats) {
+    const grid = document.getElementById('beatGrid');
+    grid.innerHTML = beats.map(beat => `
+        <div class="beat-card" onclick="loadTrack('${beat.id}')">
+            <img src="${beat.art_url}" alt="${beat.title}">
             <h3>${beat.title}</h3>
-            <p style="color: #94a3b8;">${beat.producer}</p>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                <span class="genre-badge">${beat.genre}</span>
-                <strong>${beat.price}</strong>
-            </div>
+            <p>${beat.genre}</p>
+            <button class="btn-outline" onclick="startNegotiation('${beat.producer_id}')">Chat with Producer</button>
         </div>
     `).join('');
 }
 
-// 4. PLAYER LOGIC
-function loadTrack(id) {
-    const track = currentBeats.find(b => b.id === id);
-    if (!track) return;
-
-    document.getElementById('current-title').innerText = track.title;
-    document.getElementById('current-producer').innerText = track.producer;
-    document.getElementById('current-price').innerText = track.price;
-    document.getElementById('current-art').src = track.art;
-    
-    mainPlayBtn.classList.remove('fa-play');
-    mainPlayBtn.classList.add('fa-pause');
-    
-    console.log(`Now streaming: ${track.title}`);
-    drawWaveform();
+// CART & PURCHASING
+async function loadCart() {
+    const { data } = await _supabase.from('profiles').select('cart').eq('id', user.id).single();
+    cart = data?.cart || [];
+    document.getElementById('cart-count').innerText = cart.length;
 }
 
-function drawWaveform() {
-    const canvas = document.getElementById('waveform');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#c5a059'; // Gold wave
-    
-    for(let i = 0; i < 100; i++) {
-        const height = Math.random() * 50;
-        ctx.fillRect(i * 3, 25 - height/2, 2, height);
-    }
+async function addToCart(beatId) {
+    if(!user) return openAuth();
+    cart.push(beatId);
+    await _supabase.from('profiles').update({ cart }).eq('id', user.id);
+    document.getElementById('cart-count').innerText = cart.length;
 }
 
-mainPlayBtn.addEventListener('click', () => {
-    mainPlayBtn.classList.toggle('fa-play');
-    mainPlayBtn.classList.toggle('fa-pause');
-});
+// REAL-TIME CHAT & COLLAB
+async function startNegotiation(producerId) {
+    if(!user) return openAuth();
+    toggleChat();
+    // Logic to find or create conversation between user and producer
+    const { data } = await _supabase.from('conversations').select('id').or(`participant_a.eq.${user.id},participant_b.eq.${user.id}`);
+    currentConversationId = data[0]?.id;
+    loadMessages();
+}
 
-// INITIALIZE APP
-fetchBeatsFromDB();
-drawWaveform();
+function subscribeToMessages() {
+    _supabase.channel('room1')
+    .on('postgres_changes', { event: 'INSERT', table: 'messages' }, payload => {
+        const msgList = document.getElementById('chat-messages');
+        msgList.innerHTML += `<div><b>${payload.new.sender_id === user.id ? 'You' : 'Seller'}:</b> ${payload.new.content}</div>`;
+    }).subscribe();
+}
+
+async function sendMsg() {
+    const content = document.getElementById('msg-input').value;
+    await _supabase.from('messages').insert([{ conversation_id: currentConversationId, sender_id: user.id, content }]);
+    document.getElementById('msg-input').value = '';
+}
+
+// DROPDOWN SERVICES
+function showInfo(type) {
+    const infoMap = {
+        tags: "Producer tags ensure your brand is protected. We offer custom vocal tags for $50.",
+        rights: "All beats include non-exclusive rights unless exclusive is negotiated in chat.",
+        splits: "Standard marketplace split is 50/50 publishing between producer and artist."
+    };
+    alert(infoMap[type]);
+}
+
+window.onload = () => { fetchBeats(); initSession(); };
