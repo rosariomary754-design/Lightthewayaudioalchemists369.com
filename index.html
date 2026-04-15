@@ -9,67 +9,68 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-
     <nav class="navbar">
         <div class="logo">LIGHTHOUSE <span>BEATS</span></div>
-        <div class="search-bar">
-            <input type="text" placeholder="Search by genre, mood, or BPM...">
-        </div>
         <div class="nav-links">
-            <a href="#">Explore</a>
-            <a href="#">Producers</a>
-            <button class="btn-primary">Sell Beats</button>
-            <i class="fa-regular fa-user-circle profile-icon"></i>
+            <div class="dropdown">
+                <button class="dropbtn">Producer Services <i class="fa fa-caret-down"></i></button>
+                <div class="dropdown-content">
+                    <a href="#" onclick="showInfo('tags')">Producer Tags</a>
+                    <a href="#" onclick="showInfo('rights')">Publishing Rights</a>
+                    <a href="#" onclick="showInfo('splits')">Ownership Splits</a>
+                    <a href="#" onclick="showInfo('custom')">Custom Beat Request</a>
+                </div>
+            </div>
+            <a href="#" onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</a>
+            <button class="btn-primary" id="auth-btn" onclick="openAuth()">Login/Sign Up</button>
+            <div id="user-profile-nav" style="display: none;">
+                <span id="display-name"></span>
+                <button class="btn-outline" onclick="signOut()">Sign Out</button>
+            </div>
         </div>
     </nav>
 
-    <header class="hero">
-        <div class="hero-content">
-            <h1>Find Your Signature Sound.</h1>
-            <p>The premium marketplace for exclusive beats and professional production services.</p>
-            <div class="hero-btns">
-                <button class="btn-gold">Browse Marketplace</button>
-                <button class="btn-outline">View Trending</button>
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Sign In</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <div id="mfa-container" style="display:none;">
+                <input type="text" id="mfa-code" placeholder="Enter 6-digit MFA code">
             </div>
+            <button class="btn-gold" id="auth-submit" onclick="handleAuth()">Submit</button>
+            <p onclick="toggleAuthMode()" id="auth-toggle">Need an account? Sign Up</p>
         </div>
-    </header>
+    </div>
+
+    <div id="chat-sidebar" class="chat-sidebar">
+        <div class="chat-header">Collaborations <button onclick="toggleChat()">×</button></div>
+        <div id="chat-messages" class="chat-body"></div>
+        <div class="chat-input-area">
+            <input type="text" id="msg-input" placeholder="Negotiate or collab...">
+            <button onclick="sendMsg()">Send</button>
+        </div>
+    </div>
 
     <main class="container">
-        <section class="filters">
-            <button class="filter-tag active">All</button>
-            <button class="filter-tag">Trap</button>
-            <button class="filter-tag">Lo-Fi</button>
-            <button class="filter-tag">R&B</button>
-            <button class="filter-tag">Drill</button>
-        </section>
-
-        <div class="beat-grid" id="beatGrid">
-            </div>
+        <div class="beat-grid" id="beatGrid"></div>
     </main>
 
     <footer class="audio-player">
         <div class="now-playing">
-            <img src="https://via.placeholder.com/50" alt="Artwork" id="current-art">
+            <img src="https://via.placeholder.com/50" alt="Art" id="current-art">
             <div class="track-info">
-                <span id="current-title">Select a track</span>
-                <span id="current-producer">Producer Name</span>
+                <span id="current-title">Select Track</span>
+                <span id="current-producer">Producer</span>
             </div>
         </div>
-        
         <div class="player-controls">
-            <div class="buttons">
-                <i class="fa-solid fa-backward-step"></i>
-                <i class="fa-solid fa-play" id="main-play-btn"></i>
-                <i class="fa-solid fa-forward-step"></i>
-            </div>
-            <div class="progress-container">
-                <canvas id="waveform"></canvas>
-            </div>
+            <i class="fa-solid fa-play" id="main-play-btn"></i>
+            <canvas id="waveform"></canvas>
         </div>
-
         <div class="player-actions">
-            <span class="price-tag" id="current-price">$29.99</span>
-            <button class="btn-gold">Add to Cart</button>
+            <span class="price-tag" id="current-price">$0.00</span>
+            <button class="btn-gold" id="add-to-cart-btn">Add to Cart</button>
         </div>
     </footer>
 
