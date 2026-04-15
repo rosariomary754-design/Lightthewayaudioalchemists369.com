@@ -1,23 +1,57 @@
-/* Previous Styles Inherited ... New UI Elements Below */
+/* ... [Keep all your existing code] ... */
+
+/* !!! IMPORTANT: Remove the extra '}' that was at the very end of your file !!! */
+
+/* New UI Elements Below */
 
 /* Services Dropdown */
-.dropdown { position: relative; display: inline-block; }
+.dropdown { 
+    position: relative; 
+    display: inline-block; 
+}
+
+/* Style the actual button to match the theme */
+.dropbtn {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: var(--transition);
+}
+
+.dropbtn:hover {
+    border-color: var(--accent-gold);
+}
+
 .dropdown-content {
     display: none;
     position: absolute;
     background: var(--card-bg);
-    min-width: 200px;
+    min-width: 220px;
     border: 1px solid var(--accent-gold);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.5);
     z-index: 1000;
 }
-.dropdown:hover .dropdown-content { display: block; }
+
+.dropdown:hover .dropdown-content { 
+    display: block; 
+}
+
 .dropdown-content a {
     color: var(--text-main);
     padding: 12px 16px;
     text-decoration: none;
     display: block;
+    font-size: 0.9rem;
+    transition: 0.2s;
 }
-.dropdown-content a:hover { background: var(--bg-dark); color: var(--accent-gold); }
+
+.dropdown-content a:hover { 
+    background: var(--bg-dark); 
+    color: var(--accent-gold); 
+}
 
 /* Chat Sidebar */
 .chat-sidebar {
@@ -33,34 +67,70 @@
     display: flex;
     flex-direction: column;
 }
+
 .chat-sidebar.active { right: 0; }
-.chat-header { background: var(--accent-gold); color: #000; padding: 20px; font-weight: bold; }
-.chat-body { flex: 1; padding: 20px; overflow-y: auto; color: var(--text-main); }
-.chat-input-area { padding: 20px; border-top: 1px solid #333; display: flex; }
+
+.chat-header { 
+    background: var(--accent-gold); 
+    color: #0a0e1a; 
+    padding: 20px; 
+    font-weight: bold; 
+}
+
+.chat-body { 
+    flex: 1; 
+    padding: 20px; 
+    overflow-y: auto; 
+    color: var(--text-main); 
+}
+
+.chat-input-area { 
+    padding: 20px; 
+    border-top: 1px solid #334155; 
+    display: flex; 
+    gap: 10px;
+}
+
+.chat-input-area input {
+    flex: 1;
+    background: #000;
+    border: 1px solid #334155;
+    color: white;
+    padding: 10px;
+}
 
 /* Auth Modal */
 .modal {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(5px);
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
     z-index: 2000;
     align-items: center;
     justify-content: center;
 }
+
 .modal-content {
     background: var(--card-bg);
     padding: 40px;
     border: 1px solid var(--accent-gold);
-    width: 100%;
+    width: 90%;
     max-width: 400px;
+    text-align: center;
 }
+
+.modal-content h2 {
+    margin-top: 0;
+    color: var(--accent-gold);
+}
+
 .modal-content input {
     width: 100%;
     margin-bottom: 20px;
     padding: 12px;
     background: #000;
-    border: 1px solid #333;
+    border: 1px solid #334155;
     color: #fff;
+    box-sizing: border-box; /* Ensures padding doesn't break width */
 }
