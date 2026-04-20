@@ -1,3 +1,6 @@
+const SUPABASE_URL = "https://nfcpbzwfufbotrlytden.supabase.co"
+const SUPABASE_KEY = "sb_publishable_E5GQnvQYduf2ODhxl1Cigw_J1w_57EN"
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // Mock Data for Testing
 const beats = [
     { id: 1, title: "Midnight City", producer: "Lighthouse Pro", price: "$29.99", genre: "Synthwave", art: "https://picsum.photos/id/101/300/300" },
