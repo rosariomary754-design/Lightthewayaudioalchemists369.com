@@ -1,70 +1,141 @@
-const SUPABASE_URL = "https://nfcpbzwfufbotrlytden.supabase.co"
-const SUPABASE_KEY = "sb_publishable_E5GQnvQYduf2ODhxl1Cigw_J1w_57EN"
+// Supabase Configuration
+const SUPABASE_URL = "https://nfcpbzwfufbotrlytden.supabase.co";
+const SUPABASE_KEY = "YOUR_ANON_KEY"; // Ensure your actual anon key is placed here
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Mock Data for Testing
+let user = null;
+let cart = [];
+let favorites = [];
+
+// Mock Database (Includes streams for trending, BPM, etc.)
 const beats = [
-    { id: 1, title: "Midnight City", producer: "Lighthouse Pro", price: "$29.99", genre: "Synthwave", art: "https://picsum.photos/id/101/300/300" },
-    { id: 2, title: "Deep Waters", producer: "WaveMaker", price: "$34.99", genre: "Trap", art: "https://picsum.photos/id/102/300/300" },
-    { id: 3, title: "Golden Hour", producer: "Soul Samples", price: "$49.99", genre: "Lo-Fi", art: "https://picsum.photos/id/103/300/300" },
-    { id: 4, title: "Aftermath", producer: "Beat Smith", price: "$24.99", genre: "Drill", art: "https://picsum.photos/id/104/300/300" }
+    { id: 1, title: "Midnight City", producer: "Lighthouse Pro", price: 29.99, genre: "Synthwave", bpm: 120, streams: 5000, art: "https://placehold.co/300" },
+    { id: 2, title: "Deep Waters", producer: "WaveMaker", price: 34.99, genre: "Trap", bpm: 140, streams: 12000, art: "https://placehold.co/300" },
+    { id: 3, title: "Golden Hour", producer: "Soul Samples", price: 49.99, genre: "Lo-Fi", bpm: 85, streams: 8000, art: "https://placehold.co/300" }
 ];
 
-const grid = document.getElementById('beatGrid');
-const mainPlayBtn = document.getElementById('main-play-btn');
+// --- SECURITY: 10 MINUTE INACTIVITY AUTOLOGOUT ---
+let inactivityTime = function () {
+    let time;
+    window.onload = resetTimer;
+    document.onmousemove = resetTimer;
+    document.onkeypress = resetTimer;
 
-// Initialize Grid
-function renderBeats() {
-    grid.innerHTML = beats.map(beat => `
-        <div class="beat-card" onclick="loadTrack(${beat.id})">
-            <div style="position: relative;">
-                <img src="${beat.art}" alt="${beat.title}">
-                <i class="fa-solid fa-play play-overlay"></i>
-            </div>
+    function logout() {
+        if (user) {
+            alert("You have been logged out due to 10 minutes of inactivity for your security.");
+            signOut();
+        }
+    }
+    function resetTimer() {
+        clearTimeout(time);
+        time = setTimeout(logout, 600000); // 10 minutes = 600000 ms
+    }
+};
+inactivityTime();
+
+// --- INITIALIZATION ---
+window.onload = () => { renderBeats(beats); }
+
+function renderBeats(data) {
+    const grid = document.getElementById('beatGrid');
+    grid.innerHTML = data.map(beat => `
+        <div class="beat-card">
+            <img src="${beat.art}" alt="${beat.title}">
             <h3>${beat.title}</h3>
-            <p style="color: #b3b3b3;">${beat.producer}</p>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                <span class="genre-badge">${beat.genre}</span>
-                <strong>${beat.price}</strong>
+            <p>${beat.producer} (Rating: 4.8/5 ⭐)</p>
+            <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                <span class="genre-badge">${beat.genre} | ${beat.bpm} BPM</span>
+                <strong>$${beat.price}</strong>
+            </div>
+            <div style="margin-top: 15px; display:flex; gap:10px;">
+                <button class="btn-outline" onclick="toggleFavorite(${beat.id})"><i class="fa-solid fa-heart"></i></button>
+                <button class="btn-gold" onclick="openCheckout()">Buy / License</button>
             </div>
         </div>
     `).join('');
 }
 
-// Player Logic
-function loadTrack(id) {
-    const track = beats.find(b => b.id === id);
-    document.getElementById('current-title').innerText = track.title;
-    document.getElementById('current-producer').innerText = track.producer;
-    document.getElementById('current-price').innerText = track.price;
-    document.getElementById('current-art').src = track.art;
+// --- SEARCH & FILTERING ---
+function filterBeats(type) {
+    let filtered = beats;
+    const search = document.getElementById('searchInput')?.value.toLowerCase() || "";
+    const genre = document.getElementById('genreFilter')?.value || "";
     
-    // Toggle play icon
-    mainPlayBtn.classList.remove('fa-play');
-    mainPlayBtn.classList.add('fa-pause');
-    
-    console.log(`Loading audio for: ${track.title}`);
-    drawWaveform();
+    if (type === 'Trending') {
+        filtered = filtered.sort((a, b) => b.streams - a.streams); // Highest streams first
+    } else {
+        filtered = filtered.filter(b => b.title.toLowerCase().includes(search));
+        if (genre) filtered = filtered.filter(b => b.genre === genre);
+    }
+    renderBeats(filtered);
 }
 
-// Simple Waveform Visualization Mockup
-function drawWaveform() {
-    const canvas = document.getElementById('waveform');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#FFD700';
-    
-    for(let i = 0; i < 100; i++) {
-        const height = Math.random() * 50;
-        ctx.fillRect(i * 3, 25 - height/2, 2, height);
+// --- DASHBOARD ROUTING ---
+function toggleDashboard() {
+    const dash = document.getElementById('dashboard-view');
+    const market = document.getElementById('marketplace-view');
+    if (dash.style.display === 'none') {
+        dash.style.display = 'block';
+        market.style.display = 'none';
+        showDashTab('settings'); // Default tab
+    } else {
+        dash.style.display = 'none';
+        market.style.display = 'block';
     }
 }
 
-// Event Listeners
-mainPlayBtn.addEventListener('click', () => {
-    mainPlayBtn.classList.toggle('fa-play');
-    mainPlayBtn.classList.toggle('fa-pause');
-});
+function showDashTab(tab) {
+    const content = document.getElementById('dash-content-area');
+    const supportHTML = `
+        <h3>Support & Policies</h3>
+        <ul>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Settings</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Platform Status: Online</a></li>
+        </ul>
+    `;
+    
+    const views = {
+        'favorites': `<h3>Your Favorites</h3><p>You have ${favorites.length} saved tracks.</p>`,
+        'collabs': `<h3>Collaborations</h3><p>Manage your 50/50 splits and split sheets here.</p>`,
+        'negotiations': `<h3>Private Chats</h3><p>All chats are end-to-end recorded for safety. Select a user to chat.</p>`,
+        'support': supportHTML,
+        'settings': `<h3>Security</h3><button class="btn-outline">Enable 2FA Authenticator</button>`
+    };
+    content.innerHTML = views[tab] || `<h3>${tab.toUpperCase()}</h3><p>Feature loading...</p>`;
+}
 
-renderBeats();
-drawWaveform();
+// --- CHECKOUT & LICENSING ---
+function openCheckout() {
+    document.getElementById('checkout-modal').style.display = 'flex';
+}
+
+function processPayment() {
+    const agreed = document.getElementById('signOff').checked;
+    if (!agreed) return alert("You and the producer must agree to the licensing terms to proceed.");
+    
+    // Simulate Stripe Redirect
+    alert("Redirecting to Stripe Secure Checkout...");
+    document.getElementById('checkout-modal').style.display = 'none';
+}
+
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+function openAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
+function toggleFavorite(id) { alert("Added to favorites!"); favorites.push(id); }
+
+// Dropdown Info
+function showInfo(type) {
+    const infoMap = {
+        tags: "Producer tags available for custom order.",
+        rights: "Non-Exclusive = Stream limits. Exclusive = Full rights. See checkout for details.",
+        splits: "Standard split is 50/50 publishing. Sign split sheets immediately.",
+        custom: "Hire our producers for editing, mixing, or custom beat generation."
+    };
+    alert(infoMap[type]);
+}
