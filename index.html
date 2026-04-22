@@ -6,69 +6,127 @@
     <title>Lighthouse Beats | Producer Marketplace</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
-    /* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> */
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
 <body>
-
     <nav class="navbar">
         <div class="logo">LIGHTHOUSE <span>BEATS</span></div>
-        <div class="search-bar">
-            <input type="text" placeholder="Search by genre, mood, or BPM...">
+        <div class="search-bar advanced-search">
+            <input type="text" id="searchInput" placeholder="Search beats..." onkeyup="filterBeats()">
+            <select id="genreFilter" onchange="filterBeats()">
+                <option value="">All Genres</option>
+                <option value="Trap">Trap</option>
+                <option value="R&B">R&B</option>
+            </select>
+            <input type="number" id="bpmFilter" placeholder="BPM" onkeyup="filterBeats()">
         </div>
         <div class="nav-links">
-            <a href="#">Explore</a>
-            <a href="#">Producers</a>
-            <button class="btn-primary">Sell Beats</button>
-            <i class="fa-regular fa-user-circle profile-icon"></i>
+            <div class="dropdown">
+                <button class="dropbtn">Producer Services <i class="fa fa-caret-down"></i></button>
+                <div class="dropdown-content">
+                    <a href="#" onclick="showInfo('tags')">Producer Tags</a>
+                    <a href="#" onclick="showInfo('rights')">Publishing Rights</a>
+                    <a href="#" onclick="showInfo('splits')">Ownership Splits</a>
+                    <a href="#" onclick="showInfo('custom')">Custom Editing/Beats</a>
+                </div>
+            </div>
+            <a href="#" onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</a>
+            <button class="btn-primary" id="auth-btn" onclick="openAuth()">Login/Sign Up</button>
+            <div id="user-profile-nav" style="display: none;">
+                <button class="btn-outline" onclick="toggleDashboard()">Dashboard</button>
+                <button class="btn-outline" onclick="signOut()">Sign Out</button>
+            </div>
         </div>
     </nav>
 
-    <header class="hero">
-        <div class="hero-content">
-            <h1>Find Your Signature Sound.</h1>
-            <p>The premium marketplace for exclusive beats and professional production services.</p>
-            <div class="hero-btns">
-                <button class="btn-gold">Browse Marketplace</button>
-                <button class="btn-outline">View Trending</button>
+    <main class="container" id="marketplace-view">
+        <header class="hero">
+            <div class="hero-content">
+                <h1>Find Your Signature Sound.</h1>
+                <p>The premium marketplace for exclusive beats and professional production services.</p>
             </div>
-        </div>
-    </header>
-
-    <main class="container">
+        </header>
         <section class="filters">
-            <button class="filter-tag active">All</button>
-            <button class="filter-tag">Trap</button>
-            <button class="filter-tag">Lo-Fi</button>
-            <button class="filter-tag">R&B</button>
-            <button class="filter-tag">Drill</button>
+            <button class="filter-tag active" onclick="filterBeats('All')">All</button>
+            <button class="filter-tag" onclick="filterBeats('Trending')">Trending Weekly</button>
         </section>
-
-        <div class="beat-grid" id="beatGrid">
-            </div>
+        <div class="beat-grid" id="beatGrid"></div>
     </main>
+
+    <main class="container" id="dashboard-view" style="display:none;">
+        <div class="dashboard-layout">
+            <aside class="dash-sidebar">
+                <h3>My Profile</h3>
+                <ul class="dash-menu">
+                    <li onclick="showDashTab('collabs')">Collaborations</li>
+                    <li onclick="showDashTab('favorites')">Favorites</li>
+                    <li onclick="showDashTab('history')">Purchase History</li>
+                    <li onclick="showDashTab('playlists')">Playlists & Notes</li>
+                    <li onclick="showDashTab('orders')">Ongoing Orders</li>
+                    <li onclick="showDashTab('negotiations')">Negotiations (Chats)</li>
+                    <li onclick="showDashTab('settings')">Settings</li>
+                    <li onclick="showDashTab('support')">Support</li>
+                </ul>
+            </aside>
+            <section class="dash-content" id="dash-content-area">
+                <h2>Welcome to your Dashboard</h2>
+                <p>Select an option from the menu.</p>
+            </section>
+        </div>
+    </main>
+
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Sign In / Register</h2>
+            <select id="userRole" style="margin-bottom: 15px; width: 100%; padding: 10px; background: #000; color: white;">
+                <option value="buyer">Artist / Buyer</option>
+                <option value="producer">Producer</option>
+            </select>
+            <input type="text" id="emailOrPhone" placeholder="Email or Phone Number">
+            <input type="password" id="password" placeholder="Password">
+            <button class="btn-gold" id="auth-submit" onclick="handleAuth()">Submit & Send 2FA</button>
+        </div>
+    </div>
+
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content checkout-content">
+            <h2>Secure Checkout (Stripe)</h2>
+            <div class="license-options">
+                <div class="license-card">
+                    <h3>Non-Exclusive Lease ($30–$250)</h3>
+                    <p>Rights for streaming/video. Producer retains 100% publishing.</p>
+                    <input type="radio" name="license" value="non-exclusive">
+                </div>
+                <div class="license-card">
+                    <h3>Exclusive Rights ($300–$1,000+)</h3>
+                    <p>No usage caps. Producer retains 50% publishing. Producer points negotiated.</p>
+                    <input type="radio" name="license" value="exclusive">
+                </div>
+            </div>
+            <div class="split-warning">
+                <strong>Important:</strong> Composition/Master splits are typically 50/50. Split sheets must be signed before final delivery.
+            </div>
+            <label><input type="checkbox" id="signOff"> I mutually agree to the licensing terms and ownership splits.</label>
+            <br><br>
+            <button class="btn-gold" onclick="processPayment()">Proceed to Stripe</button>
+            <button class="btn-outline" onclick="closeModal('checkout-modal')">Cancel</button>
+        </div>
+    </div>
 
     <footer class="audio-player">
         <div class="now-playing">
-            <img src="https://via.placeholder.com/50" alt="Artwork" id="current-art">
+            <img src="https://placehold.co/50" alt="Artwork" id="current-art">
             <div class="track-info">
                 <span id="current-title">Select a track</span>
-                <span id="current-producer">Producer Name</span>
+                <span id="current-producer">Producer</span>
             </div>
         </div>
-        
         <div class="player-controls">
-            <div class="buttons">
-                <i class="fa-solid fa-backward-step"></i>
-                <i class="fa-solid fa-play" id="main-play-btn"></i>
-                <i class="fa-solid fa-forward-step"></i>
-            </div>
-            <div class="progress-container">
-                <canvas id="waveform"></canvas>
-            </div>
+            <i class="fa-solid fa-play" id="main-play-btn"></i>
         </div>
-
         <div class="player-actions">
-            <span class="price-tag" id="current-price">$29.99</span>
-            <button class="btn-gold">Add to Cart</button>
+            <span class="price-tag" id="current-price">$0.00</span>
+            <button class="btn-gold" onclick="openCheckout()">Checkout</button>
         </div>
     </footer>
 
